@@ -50,8 +50,6 @@ const config = {
   database: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/falcon',
     options: {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       maxPoolSize: parseInt(process.env.DB_MAX_POOL_SIZE) || 10,
       serverSelectionTimeoutMS: parseInt(process.env.DB_TIMEOUT) || 5000,
       socketTimeoutMS: parseInt(process.env.DB_SOCKET_TIMEOUT) || 45000
