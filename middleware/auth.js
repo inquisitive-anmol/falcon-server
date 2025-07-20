@@ -5,9 +5,19 @@ const User = require('../models/User');
 
 // Protect routes - require authentication
 const protect = catchAsync(async (req, res, next) => {
-  // 1) Get token from header
-  const authHeader = req.headers.authorization;
-  const token = extractTokenFromHeader(authHeader);
+  // 1) Get token from cookie or header
+  let token = null;
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  } else {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      token = extractTokenFromHeader(authHeader);
+    }
+  }
+  if (!token) {
+    throw new AuthenticationError('No token provided');
+  }
 
   // 2) Verify token
   const decoded = verifyToken(token);

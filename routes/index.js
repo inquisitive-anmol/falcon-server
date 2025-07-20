@@ -20,6 +20,10 @@ router.use('/courses', courseRoutes);
 const adminRoutes = require('./admin');
 router.use('/admin', adminRoutes);
 
+// Import user routes
+const userRoutes = require('./user');
+router.use('/user', userRoutes);
+
 // Example route that demonstrates error handling
 router.get('/test', catchAsync(async (req, res, next) => {
   // Simulate a successful response

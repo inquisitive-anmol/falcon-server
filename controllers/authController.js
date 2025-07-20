@@ -13,6 +13,7 @@ const {
 const logger = require('../utils/logger');
 const bcrypt = require('bcryptjs');
 const emailUtil = require('../utils/email');
+const config = require('../config/server');
 
 // Register a new user
 exports.register = catchAsync(async (req, res, next) => {
@@ -64,6 +65,24 @@ exports.register = catchAsync(async (req, res, next) => {
 
   logger.info('Email verification token generated', { email, token });
 
+  // Generate tokens
+  const authToken = generateToken(user._id, user.role);
+  const refreshToken = generateRefreshToken(user._id);
+
+  // Set cookies
+  res.cookie('token', authToken, {
+    httpOnly: true,
+    secure: config.server.isProduction,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+  });
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: config.server.isProduction,
+    sameSite: 'strict',
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  });
+
   res.status(201).json({
     status: 'success',
     message: 'User registered successfully. Please verify your email.',
@@ -111,25 +130,37 @@ exports.login = catchAsync(async (req, res, next) => {
   user.lastLogin = new Date();
   await user.save();
 
+  // Set cookies
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: config.server.isProduction,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+  });
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: config.server.isProduction,
+    sameSite: 'strict',
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  });
+
   res.status(200).json({
     status: 'success',
     message: 'Login successful',
-    data: {
-      token,
-      refreshToken,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role
-      }
+    user: {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role
     }
   });
 });
 
-// Logout user (client should just delete token)
+// Logout user
 exports.logout = (req, res) => {
+  res.clearCookie('token', { httpOnly: true, secure: config.server.isProduction, sameSite: 'strict' });
+  res.clearCookie('refreshToken', { httpOnly: true, secure: config.server.isProduction, sameSite: 'strict' });
   res.status(200).json({
     status: 'success',
     message: 'Logged out successfully'
@@ -253,25 +284,21 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get current user profile
-exports.getProfile = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    throw new AuthenticationError('User not found');
+// Get current user from cookie
+exports.me = catchAsync(async (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
   res.status(200).json({
-    status: 'success',
-    data: {
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        isActive: user.isActive,
-        isEmailVerified: user.isEmailVerified,
-        avatar: user.avatar
-      }
+    user: {
+      id: req.user._id,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      email: req.user.email,
+      role: req.user.role,
+      isActive: req.user.isActive,
+      isEmailVerified: req.user.isEmailVerified,
+      avatar: req.user.avatar
     }
   });
 });

@@ -4,6 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 // Import configuration
 const config = require('./config/server');
@@ -25,6 +26,9 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors(config.security.cors));
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit(config.security.rateLimit);

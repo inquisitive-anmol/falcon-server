@@ -11,8 +11,4 @@ router.post('/verify-email', authController.verifyEmail);
 router.post('/request-password-reset', authController.requestPasswordReset);
 router.post('/reset-password', authController.resetPassword);
 
-// Protected routes
-router.get('/profile', protect, authController.getProfile);
-router.patch('/profile', protect, authController.updateProfile);
-
 module.exports = router; 
