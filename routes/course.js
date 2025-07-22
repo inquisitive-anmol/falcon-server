@@ -10,11 +10,6 @@ router.get('/featured', courseController.getFeaturedCourses);
 router.get('/category/:category', courseController.getCoursesByCategory);
 router.get('/:id', courseController.getCourseById);
 
-// Protected routes (must be logged in)
-router.post('/', protect, restrictTo('admin', 'manager', 'instructor'), courseController.createCourse);
-router.patch('/:id', protect, restrictTo('admin', 'manager', 'instructor'), courseController.updateCourse);
-router.delete('/:id', protect, restrictTo('admin', 'manager', 'instructor'), courseController.deleteCourse);
-
 // Enrollment
 router.post('/:id/enroll', protect, restrictTo('student', 'jobseeker'), courseController.enrollInCourse);
 router.post('/:id/unenroll', protect, restrictTo('student', 'jobseeker'), courseController.unenrollFromCourse);

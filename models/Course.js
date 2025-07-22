@@ -48,8 +48,7 @@ const courseSchema = new mongoose.Schema({
     max: [100, 'Discount cannot exceed 100%']
   },
   instructor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String, // Accepts name or email
     required: [true, 'Instructor is required']
   },
   thumbnail: {

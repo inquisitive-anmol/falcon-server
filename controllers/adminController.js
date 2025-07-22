@@ -109,15 +109,12 @@ exports.updateCourse = catchAsync(async (req, res, next) => {
 exports.uploadCourse = catchAsync(async (req, res, next) => {
   /*
     Expects CourseFormData structure:
-    - title, description, instructor, category, level, tags, price, thumbnail (file or url), modules[]
+    - title, description, instructor (name or email), category, level, duration, tags, price, thumbnail (file or url), modules[]
     - modules[].chapters[].content[] (type, title, file/url, duration, description)
   */
   const data = req.body;
-  // For now, assume files are already uploaded and URLs are provided in content.url and thumbnail
-  // (For real file upload, use multer and handle req.files)
-
   // Validate required fields
-  if (!data.title || !data.description || !data.instructor || !data.category || !data.level || !data.modules) {
+  if (!data.title || !data.description || !data.instructor || !data.category || !data.level || !data.duration || !data.modules) {
     throw new ValidationError('Missing required fields', []);
   }
 
@@ -126,9 +123,10 @@ exports.uploadCourse = catchAsync(async (req, res, next) => {
     title: data.title,
     description: data.description,
     shortDescription: data.shortDescription || '',
-    instructor: data.instructor, // should be user ID
+    instructor: data.instructor, // now a string (name or email)
     category: data.category,
     level: data.level.toLowerCase(),
+    duration: Number(data.duration),
     tags: data.tags || [],
     price: data.price || 0,
     thumbnail: data.thumbnailUrl || data.thumbnail || null,

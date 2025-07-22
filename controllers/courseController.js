@@ -3,51 +3,6 @@ const User = require('../models/User');
 const { AppError, ValidationError, NotFoundError, AuthorizationError } = require('../utils/errors');
 const { catchAsync } = require('../utils/errorHandler');
 
-// Create a new course (admin/manager/instructor only)
-exports.createCourse = catchAsync(async (req, res, next) => {
-  const {
-    title, description, shortDescription, category, level, duration, price, discount, thumbnail, videoUrl,
-    materials, modules, tags, isPublished, isFeatured, language, certificate, requirements, learningOutcomes,
-    maxStudents, startDate, endDate
-  } = req.body;
-
-  if (!title || !description || !category || !level || !duration || !price) {
-    throw new ValidationError('Missing required fields', []);
-  }
-
-  const course = await Course.create({
-    title,
-    description,
-    shortDescription,
-    category,
-    level,
-    duration,
-    price,
-    discount,
-    thumbnail,
-    videoUrl,
-    materials,
-    modules,
-    tags,
-    isPublished,
-    isFeatured,
-    language,
-    certificate,
-    requirements,
-    learningOutcomes,
-    maxStudents,
-    startDate,
-    endDate,
-    instructor: req.user._id
-  });
-
-  res.status(201).json({
-    status: 'success',
-    message: 'Course created successfully',
-    data: { course }
-  });
-});
-
 // Get all courses (public)
 exports.getAllCourses = catchAsync(async (req, res, next) => {
   const courses = await Course.find().populate('instructor', 'firstName lastName avatar');
@@ -65,47 +20,6 @@ exports.getCourseById = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: { course }
-  });
-});
-
-// Update a course (admin/manager/instructor only, must be owner or admin/manager)
-exports.updateCourse = catchAsync(async (req, res, next) => {
-  const course = await Course.findById(req.params.id);
-  if (!course) throw new NotFoundError('Course');
-
-  // Only owner, admin, or manager can update
-  if (
-    course.instructor.toString() !== req.user._id.toString() &&
-    !['admin', 'manager'].includes(req.user.role)
-  ) {
-    throw new AuthorizationError('You do not have permission to update this course');
-  }
-
-  Object.assign(course, req.body);
-  await course.save();
-  res.status(200).json({
-    status: 'success',
-    message: 'Course updated successfully',
-    data: { course }
-  });
-});
-
-// Delete a course (admin/manager/instructor only, must be owner or admin/manager)
-exports.deleteCourse = catchAsync(async (req, res, next) => {
-  const course = await Course.findById(req.params.id);
-  if (!course) throw new NotFoundError('Course');
-
-  if (
-    course.instructor.toString() !== req.user._id.toString() &&
-    !['admin', 'manager'].includes(req.user.role)
-  ) {
-    throw new AuthorizationError('You do not have permission to delete this course');
-  }
-
-  await course.deleteOne();
-  res.status(200).json({
-    status: 'success',
-    message: 'Course deleted successfully'
   });
 });
 
