@@ -2,6 +2,8 @@ const app = require('./index');
 const logger = require('./utils/logger');
 const config = require('./config/server');
 const database = require('./config/database');
+const path = require('path');
+const express = require('express');
 
 // Initialize server
 const initializeServer = async () => {
@@ -21,6 +23,15 @@ const initializeServer = async () => {
         timestamp: new Date().toISOString()
       });
     });
+
+    // Secure /uploads: only allow GET
+    app.use('/uploads', (req, res, next) => {
+      if (req.method !== 'GET') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
+      }
+      next();
+    });
+    app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
     // Graceful shutdown handling
     const gracefulShutdown = async (signal) => {

@@ -222,4 +222,33 @@ exports.getCoursesByCategory = catchAsync(async (req, res, next) => {
     results: courses.length,
     data: { courses }
   });
+});
+
+// Upload a file for course content (pdf/video)
+exports.uploadCourseFile = catchAsync(async (req, res, next) => {
+  if (!req.file) {
+    throw new ValidationError('No file uploaded', []);
+  }
+  const fileUrl = `/uploads/${req.file.filename}`;
+  const { id } = req.params;
+  const { type } = req.body;
+  // Optionally associate with course document
+  if (id && type && ['pdf', 'video'].includes(type)) {
+    const course = await Course.findById(id);
+    if (course) {
+      course.materials = course.materials || [];
+      course.materials.push({
+        title: req.file.originalname,
+        type,
+        url: fileUrl,
+        description: '',
+      });
+      await course.save();
+    }
+  }
+  res.status(200).json({
+    status: 'success',
+    url: fileUrl,
+    message: 'File uploaded successfully',
+  });
 }); 

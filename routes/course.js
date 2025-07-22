@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
 const { protect, restrictTo, isEnrolled } = require('../middleware/auth');
+const upload = require('../utils/fileUpload');
 
 // Public routes
 router.get('/', courseController.getAllCourses);
@@ -21,5 +22,8 @@ router.get('/my/enrolled', protect, restrictTo('student', 'jobseeker'), courseCo
 
 // Progress update (must be enrolled)
 router.patch('/:id/progress', protect, restrictTo('student', 'jobseeker'), isEnrolled, courseController.updateProgress);
+
+// File upload for course content
+router.post('/:id/upload', protect, restrictTo('admin', 'manager', 'instructor'), upload.single('file'), courseController.uploadCourseFile);
 
 module.exports = router; 

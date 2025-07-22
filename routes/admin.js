@@ -43,6 +43,6 @@ router.post('/upload', upload.single('file'), (req, res) => {
 router.delete('/upload/:filename', adminController.deleteFile);
 
 // Dashboard stats
-router.get('/stats', adminController.getStats);
+router.get('/stats', protect, restrictTo('admin', 'manager'), adminController.getStats);
 
 module.exports = router; 
