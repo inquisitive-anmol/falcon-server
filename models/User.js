@@ -59,7 +59,17 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  lockUntil: Date
+  lockUntil: Date,
+  enrolledCourses: [{
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+    progress: { type: Number, default: 0 }, // percent
+    nextLesson: { type: String }
+  }],
+  certificates: [{
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+    issued: { type: Date, default: Date.now },
+    fileUrl: { type: String }
+  }]
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

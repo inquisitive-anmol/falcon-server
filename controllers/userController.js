@@ -77,4 +77,61 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     throw new AuthenticationError('User not found');
   }
   res.status(200).json({ message: 'User deleted successfully' });
+});
+
+// Get student dashboard data
+exports.getDashboard = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user._id)
+    .populate({
+      path: 'enrolledCourses.course',
+      select: 'title instructor'
+    })
+    .populate({
+      path: 'certificates.course',
+      select: 'title'
+    });
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Stats
+  const coursesEnrolled = user.enrolledCourses.length;
+  const completed = user.enrolledCourses.filter(ec => ec.progress === 100).length;
+  const hoursStudied = user.enrolledCourses.reduce((sum, ec) => sum + (ec.progress / 100 * ((ec.course && ec.course.duration) || 0)), 0);
+  const certificatesCount = user.certificates.length;
+
+  // Current courses
+  const currentCourses = user.enrolledCourses.map(ec => ({
+    title: ec.course?.title || 'Unknown',
+    progress: ec.progress,
+    instructor: ec.course?.instructor || 'Unknown',
+    nextLesson: ec.nextLesson || 'Next Lesson'
+  }));
+
+  // Mock assignments (replace with real assignments if available)
+  const upcomingAssignments = [
+    { title: 'React Project Submission', course: 'Full Stack Development', dueDate: 'Tomorrow', priority: 'high' },
+    { title: 'Data Analysis Report', course: 'Python Data Science', dueDate: '3 days', priority: 'medium' },
+    { title: 'Marketing Campaign Design', course: 'Digital Marketing', dueDate: '1 week', priority: 'low' },
+  ];
+
+  // Certificates
+  const certificates = user.certificates.map(cert => ({
+    id: cert._id,
+    title: cert.course?.title || 'Certificate',
+    issued: cert.issued,
+    fileUrl: cert.fileUrl
+  }));
+
+  res.json({
+    stats: {
+      coursesEnrolled,
+      completed,
+      hoursStudied,
+      certificates: certificatesCount
+    },
+    currentCourses,
+    upcomingAssignments,
+    certificates
+  });
 }); 

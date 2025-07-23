@@ -15,4 +15,7 @@ router.patch('/profile', protect, userController.updateProfile);
 // Delete user account
 router.delete('/delete', protect, userController.deleteUser);
 
+// Get student dashboard data
+router.get('/dashboard', protect, userController.getDashboard);
+
 module.exports = router; 
