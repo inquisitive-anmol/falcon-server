@@ -82,16 +82,22 @@ const courseSchema = new mongoose.Schema({
     },
     description: String,
     duration: Number, // in minutes
-    content: [{
-      title: String,
-      type: {
-        type: String,
-        enum: ['video', 'text', 'quiz', 'assignment'],
-        required: true
-      },
-      content: String,
-      duration: Number,
-      order: Number
+    order: Number,
+    chapters: [{
+      title: { type: String, required: true },
+      description: String,
+      order: Number,
+      isCompleted: { type: Boolean, default: false },
+      content: [{
+        id: { type: String },
+        title: String,
+        type: { type: String, enum: ['video', 'pdf', 'zoom_link'], required: true },
+        url: String,
+        duration: String,
+        fileSize: String,
+        description: String,
+        order: Number
+      }]
     }]
   }],
   tags: [{

@@ -84,11 +84,60 @@ exports.updateCourseStatus = catchAsync(async (req, res, next) => {
 
 // Delete any course
 exports.deleteCourse = catchAsync(async (req, res, next) => {
-  const course = await Course.findByIdAndDelete(req.params.id);
+  const course = await Course.findById(req.params.id);
   if (!course) throw new NotFoundError('Course');
+
+  // Helper to delete a file if it's local
+  const deleteLocalFile = (fileUrl) => {
+    if (!fileUrl) return;
+    // Only delete if file is in uploads directory and is not an external URL
+    const uploadsDir = path.join(__dirname, '../uploads');
+    let filename = null;
+    if (fileUrl.startsWith('/uploads/')) {
+      filename = fileUrl.replace('/uploads/', '');
+    } else if (fileUrl.startsWith('uploads/')) {
+      filename = fileUrl.replace('uploads/', '');
+    } else if (fileUrl.startsWith('./uploads/')) {
+      filename = fileUrl.replace('./uploads/', '');
+    } else if (fileUrl.startsWith(process.env.BASE_URL)) {
+      // If fileUrl is absolute with BASE_URL, strip it
+      const rel = fileUrl.replace(process.env.BASE_URL, '');
+      if (rel.startsWith('/uploads/')) filename = rel.replace('/uploads/', '');
+    }
+    if (filename) {
+      const filePath = path.join(uploadsDir, filename);
+      if (fs.existsSync(filePath)) {
+        try { fs.unlinkSync(filePath); } catch (e) { /* ignore */ }
+      }
+    }
+  };
+
+  // Delete thumbnail if local
+  deleteLocalFile(course.thumbnail);
+  // Delete videoUrl if local
+  deleteLocalFile(course.videoUrl);
+  // Delete materials
+  if (Array.isArray(course.materials)) {
+    course.materials.forEach(mat => deleteLocalFile(mat.url));
+  }
+  // Delete files in modules/chapters/content
+  if (Array.isArray(course.modules)) {
+    course.modules.forEach(mod => {
+      if (Array.isArray(mod.chapters)) {
+        mod.chapters.forEach(ch => {
+          if (Array.isArray(ch.content)) {
+            ch.content.forEach(c => deleteLocalFile(c.url));
+          }
+        });
+      }
+    });
+  }
+
+  // Now delete the course document
+  await Course.findByIdAndDelete(req.params.id);
   res.status(200).json({
     status: 'success',
-    message: 'Course deleted'
+    message: 'Course and all related files deleted'
   });
 });
 
@@ -133,16 +182,21 @@ exports.uploadCourse = catchAsync(async (req, res, next) => {
     modules: (data.modules || []).map((mod, modIdx) => ({
       title: mod.title,
       description: mod.description,
-      content: undefined, // not used at module level
+      order: mod.order ?? modIdx,
       chapters: (mod.chapters || []).map((ch, chIdx) => ({
         title: ch.title,
         description: ch.description,
+        order: ch.order ?? chIdx,
+        isCompleted: ch.isCompleted ?? false,
         content: (ch.content || []).map((c, cIdx) => ({
+          id: c.id || `${modIdx}-${chIdx}-${cIdx}`,
           type: c.type,
           title: c.title,
           url: c.url || '',
           duration: c.duration,
+          fileSize: c.fileSize,
           description: c.description,
+          order: c.order ?? cIdx
         })),
       })),
     })),
