@@ -79,8 +79,6 @@ app.get('/health', async (req, res) => {
 
 // API routes
 app.use('/api', indexRoute);
-
-// Serve uploads directory as static
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 404 handler for undefined routes (must be before global error handler)
