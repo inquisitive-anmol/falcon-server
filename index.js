@@ -22,7 +22,16 @@ const indexRoute = require('./routes/index');
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "frame-ancestors": ["'self'", "http://localhost:5173"],
+      },
+    },
+  })
+);
 
 // CORS configuration
 app.use(cors(config.security.cors));
@@ -45,7 +54,7 @@ app.use(logger.logRequest.bind(logger));
 app.get('/health', async (req, res) => {
   try {
     const dbHealth = await database.healthCheck();
-    
+
     const healthStatus = {
       status: 'success',
       message: 'Server is running',
