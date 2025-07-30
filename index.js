@@ -20,6 +20,7 @@ const database = require('./config/database');
 const indexRoute = require('./routes/index');
 const managerRoutes = require('./routes/manager');
 const jobRoutes = require('./routes/jobs');
+const applicationRoutes = require('./routes/applications');
 
 const app = express();
 
@@ -92,6 +93,7 @@ app.get('/health', async (req, res) => {
 app.use('/api', indexRoute);
 app.use('/api/manager', managerRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/applications', applicationRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 404 handler for undefined routes (must be before global error handler)

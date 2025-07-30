@@ -66,7 +66,7 @@ const jobSchema = new mongoose.Schema({
   },
   applicants: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Application'
+    ref: 'User'
   }],
   isActive: {
     type: Boolean,
