@@ -7,6 +7,12 @@ const jobSchema = new mongoose.Schema({
     trim: true,
     maxlength: 100
   },
+  company: {
+    type: String,
+    required: [true, 'Company name is required'],
+    trim: true,
+    maxlength: 100
+  },
   description: {
     type: String,
     required: [true, 'Job description is required'],

@@ -19,6 +19,7 @@ const database = require('./config/database');
 // Import routes
 const indexRoute = require('./routes/index');
 const managerRoutes = require('./routes/manager');
+const jobRoutes = require('./routes/jobs');
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.get('/health', async (req, res) => {
 // API routes
 app.use('/api', indexRoute);
 app.use('/api/manager', managerRoutes);
+app.use('/api/jobs', jobRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 404 handler for undefined routes (must be before global error handler)

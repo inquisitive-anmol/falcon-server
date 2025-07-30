@@ -62,6 +62,7 @@ exports.createJob = async (req, res) => {
     }
     const {
       title,
+      company,
       description,
       department,
       location,
@@ -70,11 +71,12 @@ exports.createJob = async (req, res) => {
       responsibilities,
       salaryRange
     } = req.body;
-    if (!title || !description || !employmentType) {
-      return res.status(400).json({ error: 'Title, description, and employment type are required' });
+    if (!title || !company || !description || !employmentType) {
+      return res.status(400).json({ error: 'Title, company, description, and employment type are required' });
     }
     const job = new Job({
       title,
+      company,
       description,
       department,
       location,
@@ -118,7 +120,7 @@ exports.updateJob = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to update this job' });
     }
     const allowedFields = [
-      'title', 'description', 'department', 'location', 'employmentType', 'requirements', 'responsibilities', 'salaryRange', 'status', 'isActive'
+      'title', 'company', 'description', 'department', 'location', 'employmentType', 'requirements', 'responsibilities', 'salaryRange', 'status', 'isActive'
     ];
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) job[field] = req.body[field];
