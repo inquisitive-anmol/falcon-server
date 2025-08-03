@@ -27,7 +27,9 @@ const config = {
       message: {
         status: 'error',
         message: 'Too many requests from this IP, please try again later.'
-      }
+      },
+      // Trust proxy settings for production
+      trustProxy: process.env.NODE_ENV === 'production'
     },
     cors: {
       origin: process.env.CLIENT_URL || 'http://localhost:3000',
