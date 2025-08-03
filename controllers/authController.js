@@ -133,15 +133,13 @@ exports.login = catchAsync(async (req, res, next) => {
   // Set cookies
   res.cookie('token', token, {
     httpOnly: true,
-    // secure: config.server.isProduction,
-    secure: false,
+    secure: config.server.isProduction,
     sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
   });
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    // secure: config.server.isProduction,
-    secure: false,
+    secure: config.server.isProduction,
     sameSite: 'strict',
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
   });
