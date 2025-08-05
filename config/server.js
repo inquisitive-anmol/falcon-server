@@ -32,7 +32,7 @@ const config = {
       trustProxy: process.env.NODE_ENV === 'production'
     },
     cors: {
-      origin: process.env.ALLOWED_ORIGINS 
+        origin: process.env.ALLOWED_ORIGINS 
         ? process.env.ALLOWED_ORIGINS.split(',') 
         : [process.env.CLIENT_URL || 'http://localhost:5173'],
       credentials: true,
