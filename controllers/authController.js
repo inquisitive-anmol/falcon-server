@@ -73,13 +73,13 @@ exports.register = catchAsync(async (req, res, next) => {
   res.cookie('token', authToken, {
     httpOnly: true,
     secure: config.server.isProduction,
-    sameSite: 'strict',
+    sameSite: config.server.isProduction ? 'none' : 'lax', // Allow cross-origin in production
     maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
   });
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: config.server.isProduction,
-    sameSite: 'strict',
+    sameSite: config.server.isProduction ? 'none' : 'lax', // Allow cross-origin in production
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
   });
 
@@ -95,7 +95,8 @@ exports.register = catchAsync(async (req, res, next) => {
         role: user.role
       },
       emailVerificationToken: token // For dev/testing only
-    }
+    },
+    token: authToken // Include token in response for client-side storage
   });
 });
 
@@ -134,13 +135,13 @@ exports.login = catchAsync(async (req, res, next) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: config.server.isProduction,
-    sameSite: 'strict',
+    sameSite: config.server.isProduction ? 'none' : 'lax', // Allow cross-origin in production
     maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
   });
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: config.server.isProduction,
-    sameSite: 'strict',
+    sameSite: config.server.isProduction ? 'none' : 'lax', // Allow cross-origin in production
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
   });
 
@@ -153,14 +154,23 @@ exports.login = catchAsync(async (req, res, next) => {
       lastName: user.lastName,
       email: user.email,
       role: user.role
-    }
+    },
+    token: token // Include token in response for client-side storage
   });
 });
 
 // Logout user
 exports.logout = (req, res) => {
-  res.clearCookie('token', { httpOnly: true, secure: config.server.isProduction, sameSite: 'strict' });
-  res.clearCookie('refreshToken', { httpOnly: true, secure: config.server.isProduction, sameSite: 'strict' });
+  res.clearCookie('token', { 
+    httpOnly: true, 
+    secure: config.server.isProduction, 
+    sameSite: config.server.isProduction ? 'none' : 'lax' 
+  });
+  res.clearCookie('refreshToken', { 
+    httpOnly: true, 
+    secure: config.server.isProduction, 
+    sameSite: config.server.isProduction ? 'none' : 'lax' 
+  });
   res.status(200).json({
     status: 'success',
     message: 'Logged out successfully'

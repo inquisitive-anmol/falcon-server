@@ -13,10 +13,10 @@ const config = {
 
   // Client Configuration
   client: {
-    url: process.env.CLIENT_URL || 'http://localhost:3000',
+    url: process.env.CLIENT_URL || 'http://localhost:5173',
     allowedOrigins: process.env.ALLOWED_ORIGINS 
       ? process.env.ALLOWED_ORIGINS.split(',') 
-      : ['http://localhost:3000']
+      : ['http://localhost:5173']
   },
 
   // Security Configuration
@@ -32,10 +32,13 @@ const config = {
       trustProxy: process.env.NODE_ENV === 'production'
     },
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:3000',
+      origin: process.env.ALLOWED_ORIGINS 
+        ? process.env.ALLOWED_ORIGINS.split(',') 
+        : [process.env.CLIENT_URL || 'http://localhost:5173'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
+      exposedHeaders: ['Set-Cookie']
     },
     bodyParser: {
       json: {

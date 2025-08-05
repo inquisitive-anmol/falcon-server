@@ -46,7 +46,26 @@ app.use(
 );
 
 // CORS configuration
-app.use(cors(config.security.cors));
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
+  exposedHeaders: ['Set-Cookie']
+}));
+
+// Debug middleware for CORS requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    logger.info('CORS preflight request', {
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path,
+      headers: req.headers
+    });
+  }
+  next();
+});
 
 // Log proxy information for debugging
 if (config.server.isProduction) {
@@ -72,8 +91,8 @@ const limiter = rateLimit({
   legacyHeaders: false,
   // Trust proxy for accurate IP detection
   skip: (req) => {
-    // Skip rate limiting for health checks
-    return req.path === '/health';
+    // Skip rate limiting for health checks and CORS preflight
+    return req.path === '/health' || req.method === 'OPTIONS';
   },
   // Key generator that works with proxies
   keyGenerator: (req) => {
