@@ -110,7 +110,7 @@ const config = {
 
   // own email configuration
   ownEmail: {
-    user: process.env.OWN_EMAIL_USER,
+    user: process.env.OWNER_EMAIL,
   },
 
   // Redis Configuration (if needed)

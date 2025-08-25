@@ -65,7 +65,7 @@ exports.register = catchAsync(async (req, res, next) => {
 
   // send email to owner
   await emailUtil.sendEmailToOwner({
-    to: config.server.ownEmail.user,
+    to: (config.ownEmail && config.ownEmail.user) ? config.ownEmail.user : undefined,
     firstName: user.firstName,
     email: user.email,
     user: user,
@@ -129,9 +129,9 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // Optionally check if email is verified
-  // if (!user.isEmailVerified) {
-  //   throw new AuthenticationError('Please verify your email before logging in');
-  // }
+  if (!user.isEmailVerified) {
+    throw new AuthenticationError('Please verify your email before logging in');
+  }
 
   // Generate tokens
   const token = generateToken(user._id, user.role);
@@ -142,7 +142,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // send email to owner
   await emailUtil.sendEmailToOwner({
-    to: config.server.ownEmail.user,
+    to: (config.ownEmail && config.ownEmail.user) ? config.ownEmail.user : undefined,
     firstName: user.firstName,
     email: user.email,
     user: user,
