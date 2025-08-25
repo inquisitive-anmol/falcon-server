@@ -71,9 +71,30 @@ async function sendWelcomeEmail({ to, firstName }) {
   return sendEmail({ to, subject, html });
 }
 
+// Send email to owner
+
+async function sendEmailToOwner({ to, firstName, email, user, action }) {
+  const subject = action === "registered" ? 'New user registered' : 'User logged in ';
+      const html = action === "registered" ? `
+    <p>Hi ${firstName || ''},</p>
+    <p>A new user has registered:</p>
+    <p>User Name: ${firstName}</p>
+    <p>User Email: ${email}</p>
+    <p>User Role: ${user.role}</p>
+  ` : `
+    <p>Hi ${firstName || ''},</p>
+    <p>A user has logged in:</p>
+    <p>User Name: ${firstName}</p>
+    <p>User Email: ${email}</p>
+    <p>User Role: ${user.role}</p>
+  `;
+  return sendEmail({ to, subject, html });
+}
+
 module.exports = {
   sendEmail,
   sendVerificationEmail,
   sendPasswordResetEmail,
-  sendWelcomeEmail
+  sendWelcomeEmail,
+  sendEmailToOwner
 }; 

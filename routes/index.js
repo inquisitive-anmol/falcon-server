@@ -7,6 +7,7 @@ const {
   NotFoundError, 
   AuthenticationError 
 } = require('../utils/errors');
+const SaveEmail = require('../models/saveEmail');
 
 // Import auth routes
 const authRoutes = require('./auth');
@@ -102,6 +103,27 @@ router.get('/async-error', catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'This should not be reached'
+  });
+}));
+
+router.post('/subscribe', catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new ValidationError('Email is required', [
+      { field: 'email', message: 'Email is required' }
+    ]);
+  }
+  const existingEmail = await SaveEmail.findOne({ email });
+  if (existingEmail) {
+     throw new ValidationError('Email already subscribed', [
+      { field: 'email', message: 'Email already subscribed' }
+    ]);
+  }
+  const saveEmail = new SaveEmail({ email });
+  await saveEmail.save();
+  res.status(200).json({
+    status: 'success',
+    message: 'Email subscribed'
   });
 }));
 

@@ -63,6 +63,15 @@ exports.register = catchAsync(async (req, res, next) => {
     firstName: user.firstName
   });
 
+  // send email to owner
+  await emailUtil.sendEmailToOwner({
+    to: config.server.ownEmail.user,
+    firstName: user.firstName,
+    email: user.email,
+    user: user,
+    action: "registered"
+  });
+
   logger.info('Email verification token generated', { email, token });
 
   // Generate tokens
@@ -130,6 +139,15 @@ exports.login = catchAsync(async (req, res, next) => {
 
   user.lastLogin = new Date();
   await user.save();
+
+  // send email to owner
+  await emailUtil.sendEmailToOwner({
+    to: config.server.ownEmail.user,
+    firstName: user.firstName,
+    email: user.email,
+    user: user,
+    action: "loggedIn"
+  });
 
   // Set cookies
   res.cookie('token', token, {

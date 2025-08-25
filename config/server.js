@@ -108,6 +108,11 @@ const config = {
     from: process.env.EMAIL_FROM || process.env.EMAIL_USER
   },
 
+  // own email configuration
+  ownEmail: {
+    user: process.env.OWN_EMAIL_USER,
+  },
+
   // Redis Configuration (if needed)
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
